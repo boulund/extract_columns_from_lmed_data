@@ -24,6 +24,21 @@ def extract_columns_from_sas(filename, columns, output_csv, chunksize=100000):
             chunk.to_csv(output_csv, columns=columns, index=False, mode='a', header=False)
 
 
+def extract_columns_from_stata(filename, columns, output_csv, chunksize=100000):
+    """Iterate through STATA dta file in chunks,
+    write (append) extracted headers from chunk to CSV file.
+    """
+
+    reader = pd.read_stata(filename, columns=columns, chunksize=chunksize)
+
+    for count, chunk in enumerate(reader, start=1):
+        print("\r{} rows processed".format(count*chunksize), end="")
+        if count == 1:
+            chunk.to_csv(output_csv, index=False, mode='a')
+        else:
+            chunk.to_csv(output_csv, index=False, mode='a', header=False)
+
+
 
 if __name__ == "__main__":
     if len(argv) < 2:
@@ -35,4 +50,10 @@ if __name__ == "__main__":
             print("WARNING:", lmed_file+".csv already exists!")
             exit(2)
 
-    extract_columns_from_sas(lmed_file, columns=["lpnr", "KON", "atc", "EDATUM"], output_csv=lmed_file+".csv")
+    if lmed_file.endswith(".dta"):
+        extract_columns_from_stata(lmed_file, columns=["lpnr", "kon", "atc", "edatum"], output_csv=lmed_file+".csv")
+    elif lmed_file.endswith(".sas7bdat"):
+        extract_columns_from_sas(lmed_file, columns=["lpnr", "KON", "atc", "EDATUM"], output_csv=lmed_file+".csv")
+    else:
+        print("ERROR: unrecognized file type:", lmed_file)
+        exit(2)
