@@ -12,11 +12,9 @@ else:
 
 def extract_columns_from_sas(filename, columns, output_csv, chunksize=100000):
     """Iterate through SAS file in chunks,
-    extract headers from chunks into separate subdataframe,
-    convert contents to string (instead of bytestring)
-    write (append) extracted headers from chunk to CSV file,
-    then write resulting dataframe to disk.
-    Pray not to run out of memory...
+    extract columns from chunks into separate subdataframe,
+    convert contents to string (instead of bytestring, because of bug in pandas csv-writer),
+    write (append) extracted headers from chunk to CSV file.
     """
 
     reader = pd.read_sas(filename, chunksize=chunksize, encoding='latin1')
